@@ -3,12 +3,12 @@ import capitalise_first_indermediate as intermediate
 
 filenames = ['basic', 'intermediate']
 
-def correct_capitalise_first(filename):
+def correct_capitalise_first(basic):
   correction_comments = []
   marks = 0
 
   test_word = "horse"
-  output = filename.capitalise_first(test_word)
+  output = basic.capitalise_first(test_word)
 
   # Basic functionality - no data validation
   if output == "Horse":
@@ -29,7 +29,7 @@ def correct_capitalise_first(filename):
   # Data validation - empty string
   test_word = ""
   try:
-    output = filename.capitalise_first(test_word)
+    output = basic.capitalise_first(test_word)
   except IndexError:
     result = '''Data Validation (Empty String) Failed:
     Empty string not accounted for. A message should be returned to account for this.'''
@@ -47,7 +47,7 @@ def correct_capitalise_first(filename):
   # Data validation - incorrect data type
   test_word = 100
   try:
-    output = filename.capitalise_first(test_word)
+    output = basic.capitalise_first(test_word)
   except TypeError:
     result = '''Data Validation (Data Type) Failed:
     Non-string data not accounted for.
@@ -64,7 +64,7 @@ def correct_capitalise_first(filename):
   correction_comments.append(result)
 
   test_word = "1horse"
-  output = filename.capitalise_first(test_word)
+  output = basic.capitalise_first(test_word)
   if output == test_word:
     result = f'''Data Validation (Non-alphabet 1st character) Failed:
     Non-alphabet first character not accounted for
@@ -85,16 +85,15 @@ def correct_capitalise_first(filename):
 
   correction_comments.append(f"Total marks: {marks}")
 
+  return correction_comments
 
-  # comment_list = correct_capitalise_first()
+comment_list = correct_capitalise_first(basic)
 
-  # print(comment_list)
+print(comment_list)
 
-  file = open(f"correction_results_{filename}.txt", "w")
+file = open(f"correction_results_basic.txt", "w")
 
-  for comment in correction_comments:
-    file.write(comment + '\n\n')
+for comment in comment_list:
+  file.write(comment + '\n\n')
 
-  file.close()
-
-correct_capitalise_first(filenames[0])
+file.close()
