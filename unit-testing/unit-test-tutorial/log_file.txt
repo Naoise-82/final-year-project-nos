@@ -1,0 +1,13 @@
+F...
+======================================================================
+FAIL: test_add (__main__.TestMaths)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "g:\My Drive\Personal\H-Dip\final-year-project\unit-testing\unit-test-tutorial\test_maths.py", line 8, in test_add
+    self.assertEqual(maths.add(10,5), 15, "Check which operator you used, it should be the + operator")
+AssertionError: 5 != 15 : Check which operator you used, it should be the + operator
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.003s
+
+FAILED (failures=1)

@@ -1,0 +1,25 @@
+Basic functionality Passed:
+    Input: horse
+    Expected Output: Horse
+    Actual Output: Horse
+    Marks awarded: 40
+
+Data Validation (Empty String) Passed:
+    Empty string accounted for
+    Input: 
+    Expected Output: Message accounting for empty string
+    Actual Output: Empty string entered
+    Marks awarded: 20
+
+Data Validation (Data Type) Failed:
+    Non-string data not accounted for.
+    You should ensure that only a string variable is entered.
+
+Data Validation (Non-alphabet 1st character) Failed:
+    Non-alphabet first character not accounted for
+    Input: 1horse
+    Expected Output: Message accounting for non-alphabet first character
+    Actual Output: 1horse
+
+Total marks: 60
+
