@@ -1,8 +1,6 @@
 import capitalise_first_basic as basic
 import capitalise_first_indermediate as intermediate
 
-filenames = ['basic', 'intermediate']
-
 def correct_capitalise_first(basic):
   correction_comments = []
   marks = 0
@@ -91,7 +89,7 @@ comment_list = correct_capitalise_first(basic)
 
 print(comment_list)
 
-file = open(f"correction_results_basic.txt", "w")
+file = open(f"grading_results_basic.txt", "w")
 
 for comment in comment_list:
   file.write(comment + '\n\n')
