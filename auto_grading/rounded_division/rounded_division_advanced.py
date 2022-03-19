@@ -1,11 +1,11 @@
 # A function for dividing any 2 numbers and returning the result to 2 decimal places
-
+name = "advanced"
 def rounded_division(a,b):
     
   if a == "" or b == "":
     result = "Empty value(s) entered, cannot divide"
     
-  elif a.isalpha() or b.isalpha():
+  elif (type(a) == str and a.isalpha()) or (type(b) == str and b.isalpha()):
     result = "Non numeric value entered, cannot divide."
   
   else:

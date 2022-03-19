@@ -2,17 +2,22 @@ import rounded_division_basic as basic
 import rounded_division_intermediate as intermediate
 import rounded_division_advanced as advanced
 import rounded_division_complete as complete
+import os
 
-def autograde_rounded_division(basic):
+input_files = [basic, intermediate, advanced, complete]
+input_filenames = [file.name for file in input_files]
+print(input_filenames)
+
+def autograde_rounded_division(input_file):
   correction_comments = []
   marks = 0
 
-  a = "20"
-  b = "3"
-  output = basic.rounded_division(a,b)
-
   # Basic functionality - no data validation
-  if output == 2.00:
+  a = 20
+  b = 3
+  output = input_file.rounded_division(a,b)
+
+  if output == 6.67:
     marks += 40
     result = f'''Basic functionality Passed:
     Inputs: {a}, {b}
@@ -29,58 +34,73 @@ def autograde_rounded_division(basic):
   
   correction_comments.append(result)
 
-  # Data validation - empty string
-  test_word = ""
+   # Data validation - incorrect data type
+  a = "20"
+  b = "3"
   try:
-    output = basic.capitalise_first(test_word)
-  except IndexError:
-    result = '''Data Validation (Empty String) Failed:
-    Empty string not accounted for. A message should be returned to account for this.'''
-  else:
-    marks += 20
-    result = f'''Data Validation (Empty String) Passed:
-    Empty string accounted for
-    Input: {test_word}
-    Expected Output: Message accounting for empty string
-    Actual Output: {output}
-    Marks awarded: 20'''
-
-    correction_comments.append(result)
-  
-  # Data validation - incorrect data type
-  test_word = 100
-  try:
-    output = basic.capitalise_first(test_word)
-  except TypeError:
+    output = input_file.rounded_division(a,b)
+  except TypeError as e:
     result = '''Data Validation (Data Type) Failed:
-    Non-string data not accounted for.
-    You should ensure that only a string variable is entered.'''
+    String data not accounted for
+    Inputs: "20", "3"
+    You should ensure that only int or float data is used in the calculation
+    Use float(a) and float(b) to convert the values to floats
+    Error Outputted: {e}'''
   else:
     marks += 20
     result = f'''Data Validation (Data Type) Passed:
-    Non-string data accounted for
-    Input: {test_word}
-    Expected Output: Message accounting for non-string
+    String data accounted for
+    Inputs: {a}, {b}
+    Expected Output: 6.67
     Actual Output: {output}
     Marks Awarded: 20'''
 
   correction_comments.append(result)
 
-  test_word = "1horse"
-  output = basic.capitalise_first(test_word)
-  if output == test_word:
-    result = f'''Data Validation (Non-alphabet 1st character) Failed:
-    Non-alphabet first character not accounted for
-    Input: {test_word}
-    Expected Output: Message accounting for non-alphabet first character
-    Actual Output: {output}'''
+  # Data validation - empty values
+  a = ""
+  b = ""
+  try:
+    output = input_file.rounded_division(a,b)
+  except TypeError as e:
+    result = '''Data Validation (Empty Values) Failed:
+    Empty values not accounted for
+    Inputs: Empty values for both a and b
+    Expected Output: Message accounting for empty values
+    Error Outputted: {e}
+    Use
+      if a == "" or b == "":
+    to test for empty values, and print a message if either is true'''
+  else:
+    marks += 20
+    result = f'''Data Validation (Empty Values) Passed:
+    Empty values(s) accounted for
+    Inputs: {a}, {b}
+    Expected Output: Message accounting for empty values
+    Actual Output: {output}
+    Marks awarded: 20'''
+
+  correction_comments.append(result)
+
+  # Data Validation - Divide by 0
+  a = 20
+  b = 0
+  try:
+    output = input_file.rounded_division(a,b)
+  except ZeroDivisionError as e:
+    result = f'''Data Validation (Divide by 0) Failed:
+    Divide by 0 not accounted for
+    Inputs: {a}, {b}
+    Expected Output: Message accounting for 0 entered for variable b
+    Actual Output: {e}
+    Use if float(b) == 0.00 to test'''
   
   else:
     marks += 20
-    result = f'''Data Validation (Non-alphabet first character) Passed:
-    Non-alphabet first character accounted for
-    Input: {test_word}
-    Expected Output: Message accounting for non-aplpha first character
+    result = f'''Data Validation (Divide by 0) Passed:
+    Variable b entered as 0 accounted for
+    Inputs: {a}, {b}
+    Expected Output: Message accounting for 0 entered as variable b
     Actual Output: {output}
     Marks awarded: 20'''
   
@@ -90,13 +110,19 @@ def autograde_rounded_division(basic):
 
   return correction_comments
 
-comment_list = correct_capitalise_first(basic)
+count = 1
 
-print(comment_list)
+for i in range(len(input_files)):
+  
+  comment_list = autograde_rounded_division(input_files[i])
 
-file = open(f"grading_results_basic.txt", "w")
+  print(comment_list)
 
-for comment in comment_list:
-  file.write(comment + '\n\n')
+  file = open(f"auto_grading/feedback_outputs/grading_results_{input_filenames[i]}.txt", "w")
 
-file.close()
+  for comment in comment_list:
+    file.write(comment + '\n\n')
+
+  file.close()
+  count += 1
+

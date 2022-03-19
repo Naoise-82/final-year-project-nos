@@ -1,17 +1,17 @@
 # A function for dividing any 2 numbers and returning the result to 2 decimal places
-
+name = "complete"
 def rounded_division(a,b):
     
   if a == "" or b == "":
     result = "Empty value(s) entered, cannot divide."
     
-  elif a.isalpha() or b.isalpha():
+  elif (type(a) == str and a.isalpha()) or (type(b) == str and b.isalpha()):
     result = "Non numeric value entered, cannot divide."
   
-  elif a.isalnum() == False or b.isalnum() == False:
+  elif (type(a) == str and a.isalnum() == False) or (type(b) == str and b.isalnum() == False):
     result = "Non numeric value entered, cannot divide."
 
-  elif b == "0":
+  elif b == float(b) == 0.00:
     result = "Cannot divide by zero."
   
   else:
@@ -19,4 +19,4 @@ def rounded_division(a,b):
 
   return result
 
-print(rounded_division("?","7"))
+#print(rounded_division("?","7"))

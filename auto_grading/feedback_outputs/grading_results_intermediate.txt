@@ -1,0 +1,29 @@
+Basic functionality Passed:
+    Inputs: 20, 3
+    Expected Output: 6.67
+    Actual Output: 6.67
+    Marks awarded: 40
+
+Data Validation (Data Type) Passed:
+    String data accounted for
+    Inputs: 20, 3
+    Expected Output: 6.67
+    Actual Output: 6.67
+    Marks Awarded: 20
+
+Data Validation (Empty Values) Passed:
+    Empty values(s) accounted for
+    Inputs: , 
+    Expected Output: Message accounting for empty values
+    Actual Output: Empty value(s) entered, cannot divide
+    Marks awarded: 20
+
+Data Validation (Divide by 0) Failed:
+    Divide by 0 not accounted for
+    Inputs: 20, 0
+    Expected Output: Message accounting for 0 entered for variable b
+    Actual Output: float division by zero
+    Use if float(b) == 0.00 to test
+
+Total marks: 80
+
