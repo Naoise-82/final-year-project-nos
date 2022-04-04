@@ -1,5 +1,4 @@
 # A function for capitalising the first letter of a string
-  
 def capitalise_first(input_string):
 
   # check for empty string

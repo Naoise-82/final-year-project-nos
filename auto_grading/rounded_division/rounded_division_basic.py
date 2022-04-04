@@ -1,5 +1,6 @@
 # A function for dividing any 2 numbers and returning the result to 2 decimal places
-name = "basic"
+name = "jimmy"
+email_address = "jaimmy@email.com"
 def rounded_division(a,b):
   result = round(a/b, 2)
 
