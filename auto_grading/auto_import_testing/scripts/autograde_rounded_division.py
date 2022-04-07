@@ -145,7 +145,9 @@ for i in range(len(student_files)):
   file.close()
   count += 1
 
+# add the feedback_filepath column to the csv data
 feedback_data["feedback_filepath"] = feedback_files
 print(feedback_data.head())
 
+# write the data back to the csv file
 feedback_data.to_csv('feedback_data.csv', index=False)
