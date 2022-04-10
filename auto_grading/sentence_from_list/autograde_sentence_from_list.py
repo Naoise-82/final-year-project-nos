@@ -1,11 +1,20 @@
 from pandas import *
 import os
 import pathlib
+from tkinter import Tk, filedialog
+
+root = Tk() # pointing root to Tk() to use it as Tk() in program.
+root.withdraw() # Hides small tkinter window.
+
+root.attributes('-topmost', True) # Opened windows will be active. above all windows despite of selection.
+
+folder_path = filedialog.askdirectory() # Returns opened path as str
+print(folder_path) 
 
 #change the current working directory to the current path
-current_path = pathlib.Path(__file__).parent
+# current_path = pathlib.Path(__file__).parent
 # print(current_path)
-os.chdir(current_path)
+os.chdir(folder_path)
 
 # access the feedback_data CSV file and add the filenames ot a list
 feedback_data = read_csv("feedback_data.csv")
@@ -30,7 +39,7 @@ def run_autograde(input_file):
   # Basic functionality - no data validation
   word_list = ['i', 'like', 'green', 'eggs', 'and', 'ham']
   
-  output = input_file.sentence_from_list()
+  output = input_file.sentence_from_list(word_list)
 
   if output == "i like green eggs and ham ":
     marks += 40
@@ -138,7 +147,7 @@ for i in range(len(student_files)):
   
   comment_list = run_autograde(modules[i])
 
-  feedback_file = f"{current_path}\\{student_files[i]}_feedback.txt"
+  feedback_file = f"{folder_path}\\{student_files[i]}_feedback.txt"
 
   feedback_files.append(feedback_file)
 

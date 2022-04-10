@@ -13,7 +13,7 @@ def rounded_division(a,b):
   elif (type(a) == str and a.isalnum() == False) or (type(b) == str and b.isalnum() == False):
     result = "Non numeric value entered, cannot divide."
 
-  elif b == float(b) == 0.00:
+  elif float(b) == 0.00:
     result = "Cannot divide by zero."
   
   else:

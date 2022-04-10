@@ -4,10 +4,6 @@
 
 def rounded_division(a,b):
   
-  if a == "" or b == "":
-    result = "Empty value(s) entered, cannot divide"
-  
-  else:
-    result = round(float(a)/float(b), 2)
+  result = round(a/b, 2)
 
   return result
