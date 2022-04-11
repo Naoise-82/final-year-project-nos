@@ -11,14 +11,11 @@ root.attributes('-topmost', True) # Opened windows will be active. above all win
 folder_path = filedialog.askdirectory() # Returns opened path as str
 print(folder_path) 
 
-#change the current working directory to the current path
-# current_path = pathlib.Path(__file__).parent
-# print(current_path)
+#change the current working directory to the path containg the students' files
 os.chdir(folder_path)
 
 # access the feedback_data CSV file and add the filenames ot a list
 feedback_data = read_csv("feedback_data.csv")
-feedback_data.head()
 student_files = feedback_data['filename'].tolist()
 
 # import all of the students' files as modules
@@ -106,10 +103,10 @@ def run_autograde(input_file):
 
   correction_comments.append(result)
 
-  # Complete Output - First letter of first word capitalised
-  word_list = ['i', 'like', 'green', 'eggs', 'and', 'ham']
+  # Complete Output - First letter of first word capitalised, non-string data type validation
+  word_list = ['We', 'like', 'green', 'eggs', 'and', 'ham', 2]
   
-  if output == "I like green eggs and ham.":
+  if output == "We like green eggs and ham 2.":
     result = f'''Complete Output (First letter of first word capitalised) Failed:
     Divide by 0 not accounted for
     Input: {word_list}
@@ -129,7 +126,7 @@ def run_autograde(input_file):
     marks += 20
     result = f'''Complete Output (First letter of first word capitalised) Passed:
     Input: {word_list}
-    Expected Output: I like green eggs and ham.
+    Expected Output: We like green eggs and ham 2.
     Actual Output: {output}
     Marks awarded: 20'''
   

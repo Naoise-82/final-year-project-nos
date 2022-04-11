@@ -3,8 +3,11 @@ name = "frank"
 email_address = "frank@frank.com"
 
 def rounded_division(a,b):
+
+  if (type(a) != float or int or str) or (type(b) != float or int or str):
+    result = "Incorrect data type Entered. Please use str, int or float"
     
-  if a == "" or b == "":
+  elif a == "" or b == "":
     result = "Empty value(s) entered, cannot divide."
     
   elif (type(a) == str and a.isalpha()) or (type(b) == str and b.isalpha()):

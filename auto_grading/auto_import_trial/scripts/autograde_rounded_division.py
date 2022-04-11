@@ -7,14 +7,15 @@ current_path = pathlib.Path(__file__).parent
 # print(current_path)
 os.chdir(current_path)
 
-# access the feedback_data CSV file and add the filenames ot a list
+# access the feedback_data CSV file and add the filenames to a list
 feedback_data = read_csv("feedback_data.csv")
-feedback_data.head()
+print(feedback_data.head()) # print the dataframe to the terminal
 student_files = feedback_data['filename'].tolist()
+print("Student Files", student_files)
+print()
 
 # import all of the students' files as modules
 modules = []
-
 for file in student_files:
   try:
     modules.append(__import__(file))
@@ -147,7 +148,6 @@ for i in range(len(student_files)):
 
 # add the feedback_filepath column to the csv data
 feedback_data["feedback_filepath"] = feedback_files
-print(feedback_data.head())
 
 # write the data back to the csv file
 feedback_data.to_csv('feedback_data.csv', index=False)
