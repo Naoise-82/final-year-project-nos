@@ -12,14 +12,8 @@ def sentence_from_list(word_list):
   if len(word_list) == 0:
     sentence = "List is empty."
   
-  # ensure that each item in the list is a string variable
-  str_word_list = []
-  for word in word_list:
-    word = str(word)
-    str_word_list.append(word)
-  
   # add each word in the list to the string with a space
-  for word in str_word_list:
+  for word in word_list:
     sentence += word + " "
   
   # remove the last space and add a full stop
@@ -27,5 +21,5 @@ def sentence_from_list(word_list):
 
   return sentence
 
-print(sentence_from_list(sample_list))
-print(sentence_from_list(sample_list_02))
+#print(sentence_from_list(sample_list))
+#print(sentence_from_list(sample_list_02))

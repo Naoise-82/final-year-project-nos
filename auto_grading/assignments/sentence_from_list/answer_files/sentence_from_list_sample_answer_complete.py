@@ -46,5 +46,5 @@ def sentence_from_list(word_list):
 
   return final_sentence
 
-print(sentence_from_list(sample_list))
-print(sentence_from_list(sample_list_02))
+#print(sentence_from_list(sample_list))
+#print(sentence_from_list(sample_list_02))
