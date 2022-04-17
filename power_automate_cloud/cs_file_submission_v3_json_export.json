@@ -1,0 +1,453 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+    },
+    "$authentication": {
+      "defaultValue": {},
+      "type": "SecureObject"
+    }
+  },
+  "triggers": {
+    "When_a_file_is_created_(properties_only)": {
+      "recurrence": {
+        "frequency": "Minute",
+        "interval": 5
+      },
+      "splitOn": "@triggerOutputs()?['body/value']",
+      "metadata": {
+        "operationMetadataId": "42e59a92-03c3-48d7-a9e6-1ee783c0404c"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+          "connectionName": "shared_sharepointonline",
+          "operationId": "GetOnNewFileItems"
+        },
+        "parameters": {
+          "dataset": "https://corketb.sharepoint.com/sites/CFA_CS_Test",
+          "table": "ad967d5b-f9f2-4060-b6ef-fe25efd031ae",
+          "folderPath": "/Student Work/Submitted files"
+        },
+        "authentication": "@parameters('$authentication')"
+      }
+    }
+  },
+  "actions": {
+    "Initialise_folderPathValues_Array": {
+      "runAfter": {
+        "Split_folderPathString_into_Array": [
+          "Succeeded"
+        ]
+      },
+      "metadata": {
+        "operationMetadataId": "caf8ca0c-20fd-44ab-a7fa-5635de746597"
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "folderPathValues",
+            "type": "array",
+            "value": "@outputs('Split_folderPathString_into_Array')"
+          }
+        ]
+      }
+    },
+    "Initialise_folderPathString": {
+      "runAfter": {},
+      "metadata": {
+        "operationMetadataId": "5c447445-9b74-4686-a999-3f722a8dd4ad"
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "folderPathString",
+            "type": "string",
+            "value": "@triggerOutputs()?['body/{Path}']"
+          }
+        ]
+      }
+    },
+    "Split_folderPathString_into_Array": {
+      "runAfter": {
+        "Initialise_folderPathString": [
+          "Succeeded"
+        ]
+      },
+      "metadata": {
+        "operationMetadataId": "542b8c98-3890-4cd9-a8ff-daf0adb2746f"
+      },
+      "type": "Compose",
+      "inputs": "@split(triggerOutputs()?['body/{Path}'], '/')"
+    },
+    "Test_File_Extension_Type_and_Create_File": {
+      "actions": {
+        "Get_file_content_using_path": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "b658cf19-c82f-4158-969b-79201b503581"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "GetFileContentByPath"
+            },
+            "parameters": {
+              "dataset": "https://corketb.sharepoint.com/sites/CFA_CS_Test",
+              "path": "@triggerOutputs()?['body/{FullPath}']",
+              "inferContentType": true
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Set_csvPath": {
+          "runAfter": {
+            "Create_Copy_of_Student's_Python_File_and_Add_their_Name": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "daeba5b3-fa24-4fba-8df7-345f480013f9"
+          },
+          "type": "SetVariable",
+          "inputs": {
+            "name": "csvPath",
+            "value": "/02 - Subjects/Computer Science/CS_Test_Autograding/@{outputs('Get_Assignment_Name')}"
+          }
+        },
+        "Get_CSV_Content_(If_Exists)": {
+          "runAfter": {
+            "Get_CSV_Metadata_(If_Exists)": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "f2aac532-2ffd-470d-b337-b5a74d336f33"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+              "connectionName": "shared_onedriveforbusiness",
+              "operationId": "GetFileContentByPath"
+            },
+            "parameters": {
+              "path": "@{variables('csvPath')}/feedback_data.csv",
+              "inferContentType": true
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Update_CSV_(If__Exists)": {
+          "runAfter": {
+            "Get_CSV_Content_(If_Exists)": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "0948ff02-a4d4-4651-ae70-2ce66a3701a2"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+              "connectionName": "shared_onedriveforbusiness",
+              "operationId": "UpdateFile"
+            },
+            "parameters": {
+              "id": "@outputs('Get_CSV_Metadata_(If_Exists)')?['body/Id']",
+              "body": "@{body('Get_CSV_Content_(If_Exists)')}\n@{variables('firstName')},@{variables('emailAddress')},@{outputs('Get_Assignment_Name')},@{outputs('Create_Copy_of_Student''s_Python_File_and_Add_their_Name')?['body/NameNoExt']}"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          }
+        },
+        "Search_for_Student_Profile": {
+          "runAfter": {
+            "Get_Assignment_Name": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3c278c42-8119-46ae-b475-de42e93a9939"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365users",
+              "connectionName": "shared_office365users",
+              "operationId": "SearchUserV2"
+            },
+            "parameters": {
+              "searchTerm": "@outputs('Get_Student_Name')"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Get_Student_Name": {
+          "runAfter": {
+            "Get_file_content_using_path": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "455f4d15-ffd6-4b74-aba3-5fc7bfa45b13"
+          },
+          "type": "Compose",
+          "inputs": "@variables('folderPathValues')[2]"
+        },
+        "Create_Copy_of_Student's_Python_File_and_Add_their_Name": {
+          "runAfter": {
+            "Set_firstName,_lastName_and_emailAddress": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "1ec74931-0ee1-4e68-a4d1-d01e085f2a85"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+              "connectionName": "shared_onedriveforbusiness_2",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "folderPath": "/02 - Subjects/Computer Science/CS_Test_Autograding/@{outputs('Get_Assignment_Name')}/",
+              "name": "@{variables('firstName')}_@{variables('lastName')}_@{triggerOutputs()?['body/{FilenameWithExtension}']}",
+              "body": "@body('Get_file_content_using_path')"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          }
+        },
+        "Create_CSV_(If_not_Exists)": {
+          "runAfter": {
+            "Update_CSV_(If__Exists)": [
+              "Skipped"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "41b4ea04-09d1-4faf-969f-bc32bff49445"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+              "connectionName": "shared_onedriveforbusiness",
+              "operationId": "CreateFile"
+            },
+            "parameters": {
+              "folderPath": "@variables('csvPath')",
+              "name": "feedback_data.csv",
+              "body": "name,email,assignment_name,filename,feedback_filepath\n@{variables('firstName')},@{variables('emailAddress')},@{outputs('Get_Assignment_Name')},@{outputs('Create_Copy_of_Student''s_Python_File_and_Add_their_Name')?['body/NameNoExt']}"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "contentTransfer": {
+              "transferMode": "Chunked"
+            }
+          }
+        },
+        "Set_firstName,_lastName_and_emailAddress": {
+          "foreach": "@outputs('Search_for_Student_Profile')?['body/value']",
+          "actions": {
+            "Set_firstName": {
+              "runAfter": {},
+              "metadata": {
+                "operationMetadataId": "bf9b0665-ac84-48a3-8af9-92d58c31680b"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "firstName",
+                "value": "@items('Set_firstName,_lastName_and_emailAddress')?['GivenName']"
+              }
+            },
+            "Set_emailAddress": {
+              "runAfter": {
+                "Set_variable": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "cd0ea5a2-dd7e-48ee-98f8-34090ae9ec08"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "emailAddress",
+                "value": "@items('Set_firstName,_lastName_and_emailAddress')?['Mail']"
+              }
+            },
+            "Set_variable": {
+              "runAfter": {
+                "Set_firstName": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "4179cafd-c02d-4029-b6a8-9a0232ce181e"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "lastName",
+                "value": "@items('Set_firstName,_lastName_and_emailAddress')?['Surname']"
+              }
+            }
+          },
+          "runAfter": {
+            "Search_for_Student_Profile": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "4ddc8bcf-5719-4305-a28a-de42135f79b1"
+          },
+          "type": "Foreach"
+        },
+        "Get_Assignment_Name": {
+          "runAfter": {
+            "Get_Student_Name": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "36b9033e-dfc2-4e8c-a364-3835001ee587"
+          },
+          "type": "Compose",
+          "inputs": "@variables('folderPathValues')[3]"
+        },
+        "Get_CSV_Metadata_(If_Exists)": {
+          "runAfter": {
+            "Set_csvPath": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "1b902217-6a3e-4e21-b212-9a493ea7e729"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+              "connectionName": "shared_onedriveforbusiness",
+              "operationId": "GetFileMetadataByPath"
+            },
+            "parameters": {
+              "path": "@{variables('csvPath')}/feedback_data.csv"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "runAfter": {
+        "Initialize_emailAddress": [
+          "Succeeded"
+        ]
+      },
+      "expression": {
+        "equals": [
+          "@slice(triggerOutputs()?['body/{FilenameWithExtension}'],-3)",
+          ".py"
+        ]
+      },
+      "metadata": {
+        "operationMetadataId": "f2bf5302-b3bc-47f9-80b3-29284854ef84"
+      },
+      "type": "If"
+    },
+    "Initialize_csvPath": {
+      "runAfter": {
+        "Initialise_folderPathValues_Array": [
+          "Succeeded"
+        ]
+      },
+      "metadata": {
+        "operationMetadataId": "1fda9206-193d-4d63-9c5b-e961401a59fe"
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "csvPath",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "Initialize_firstName": {
+      "runAfter": {
+        "Initialize_csvPath": [
+          "Succeeded"
+        ]
+      },
+      "metadata": {
+        "operationMetadataId": "e5d0d74d-c59d-418d-8b8c-3e0cf03f16fc"
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "firstName",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "Initialize_emailAddress": {
+      "runAfter": {
+        "Initialize_lastName": [
+          "Succeeded"
+        ]
+      },
+      "metadata": {
+        "operationMetadataId": "1e1835da-c315-446c-b128-504d028e8cf5"
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "emailAddress",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "Initialize_lastName": {
+      "runAfter": {
+        "Initialize_firstName": [
+          "Succeeded"
+        ]
+      },
+      "metadata": {
+        "operationMetadataId": "037d9809-f12c-416f-bade-bcef880747c0"
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+        "variables": [
+          {
+            "name": "lastName",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "outputs": {}
+}

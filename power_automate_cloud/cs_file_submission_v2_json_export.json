@@ -1,0 +1,142 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+    },
+    "$authentication": {
+      "defaultValue": {},
+      "type": "SecureObject"
+    }
+  },
+  "triggers": {
+    "When_a_file_is_created_(properties_only)": {
+      "recurrence": {
+        "frequency": "Minute",
+        "interval": 5
+      },
+      "splitOn": "@triggerOutputs()?['body/value']",
+      "metadata": {
+        "operationMetadataId": "42e59a92-03c3-48d7-a9e6-1ee783c0404c"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+          "connectionName": "shared_sharepointonline",
+          "operationId": "GetOnNewFileItems"
+        },
+        "parameters": {
+          "dataset": "https://corketb.sharepoint.com/sites/CFA_CS_Test",
+          "table": "ad967d5b-f9f2-4060-b6ef-fe25efd031ae",
+          "folderPath": "/Student Work/Submitted files"
+        },
+        "authentication": "@parameters('$authentication')"
+      }
+    }
+  },
+  "actions": {
+    "Get_file_properties": {
+      "runAfter": {},
+      "metadata": {
+        "operationMetadataId": "b0e3cc54-0591-4ee4-ba4f-e25722c377e0"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+          "connectionName": "shared_sharepointonline",
+          "operationId": "GetFileItem"
+        },
+        "parameters": {
+          "dataset": "https://corketb.sharepoint.com/sites/CFA_CS_Test",
+          "table": "ad967d5b-f9f2-4060-b6ef-fe25efd031ae",
+          "id": "@triggerOutputs()?['body/ID']"
+        },
+        "authentication": "@parameters('$authentication')"
+      }
+    },
+    "Add_a_row_into_a_table": {
+      "runAfter": {
+        "Get_file_properties": [
+          "Succeeded"
+        ]
+      },
+      "metadata": {
+        "operationMetadataId": "dcf0abed-4878-4630-86e9-808ed94aff9a",
+        "tableId": "{D35CF1F4-8714-4D9C-87D4-A777067DBE14}"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+          "connectionName": "shared_excelonlinebusiness",
+          "operationId": "AddRowV2"
+        },
+        "parameters": {
+          "source": "me",
+          "drive": "b!NUGj1s0E_067MHtyBagpmwdQCO7Az-FCqQIXpljHgZ9mTc8Edgt3QLBskO7s7RR9",
+          "file": "/02 - Subjects/Computer Science/CS_Test_Autograding/file_data_collection.xlsx",
+          "table": "{D35CF1F4-8714-4D9C-87D4-A777067DBE14}",
+          "item/date": "@outputs('Get_file_properties')?['body/Modified']",
+          "item/name": "@outputs('Get_file_properties')?['body/Editor/DisplayName']",
+          "item/email": "@outputs('Get_file_properties')?['body/Editor/Email']",
+          "item/filename": "@outputs('Get_file_properties')?['body/{FilenameWithExtension}']"
+        },
+        "authentication": "@parameters('$authentication')"
+      }
+    },
+    "Create_file": {
+      "runAfter": {
+        "Get_file_content_using_path": [
+          "Succeeded"
+        ]
+      },
+      "metadata": {
+        "operationMetadataId": "1ec74931-0ee1-4e68-a4d1-d01e085f2a85"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+          "connectionName": "shared_onedriveforbusiness",
+          "operationId": "CreateFile"
+        },
+        "parameters": {
+          "folderPath": "/02 - Subjects/Computer Science/CS_Test_Autograding",
+          "name": "@triggerOutputs()?['body/{FilenameWithExtension}']",
+          "body": "@body('Get_file_content_using_path')"
+        },
+        "authentication": "@parameters('$authentication')"
+      },
+      "runtimeConfiguration": {
+        "contentTransfer": {
+          "transferMode": "Chunked"
+        }
+      }
+    },
+    "Get_file_content_using_path": {
+      "runAfter": {},
+      "metadata": {
+        "operationMetadataId": "70048aea-e2a8-42d3-a290-bda428a9225d"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+          "connectionName": "shared_sharepointonline",
+          "operationId": "GetFileContentByPath"
+        },
+        "parameters": {
+          "dataset": "https://corketb.sharepoint.com/sites/CFA_CS_Test",
+          "path": "@triggerOutputs()?['body/{FullPath}']",
+          "inferContentType": true
+        },
+        "authentication": "@parameters('$authentication')"
+      }
+    }
+  },
+  "outputs": {}
+}

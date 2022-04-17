@@ -1,0 +1,92 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+    },
+    "$authentication": {
+      "defaultValue": {},
+      "type": "SecureObject"
+    }
+  },
+  "triggers": {
+    "When_a_file_is_created_(properties_only)": {
+      "recurrence": {
+        "frequency": "Minute",
+        "interval": 5
+      },
+      "splitOn": "@triggerOutputs()?['body/value']",
+      "metadata": {
+        "operationMetadataId": "041302b6-b179-48f7-aa08-05cdfaa31472"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+          "connectionName": "shared_sharepointonline",
+          "operationId": "GetOnNewFileItems"
+        },
+        "parameters": {
+          "dataset": "https://corketb.sharepoint.com/sites/CFA_Comp_Sci_21",
+          "table": "b078c9e8-4890-437c-b3f4-01dfb6cbc14e",
+          "folderPath": "/Student Work/Submitted files"
+        },
+        "authentication": "@parameters('$authentication')"
+      }
+    }
+  },
+  "actions": {
+    "Get_file_properties": {
+      "runAfter": {},
+      "metadata": {
+        "operationMetadataId": "70fb7715-db2c-46a6-baaa-b097a5817456"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+          "connectionName": "shared_sharepointonline",
+          "operationId": "GetFileItem"
+        },
+        "parameters": {
+          "dataset": "https://corketb.sharepoint.com/sites/CFA_Comp_Sci_21",
+          "table": "b078c9e8-4890-437c-b3f4-01dfb6cbc14e",
+          "id": "@triggerOutputs()?['body/ID']"
+        },
+        "authentication": "@parameters('$authentication')"
+      }
+    },
+    "Create_file": {
+      "runAfter": {
+        "Get_file_properties": [
+          "Succeeded"
+        ]
+      },
+      "metadata": {
+        "operationMetadataId": "eb50614a-1219-457e-b095-d08df7920a40"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+          "connectionName": "shared_onedriveforbusiness",
+          "operationId": "CreateFile"
+        },
+        "parameters": {
+          "folderPath": "/02 - Subjects/Computer Science/CS_Test_Autograding",
+          "name": "@outputs('Get_file_properties')?['body/{FilenameWithExtension}']",
+          "body": "@body('Get_file_properties')"
+        },
+        "authentication": "@parameters('$authentication')"
+      },
+      "runtimeConfiguration": {
+        "contentTransfer": {
+          "transferMode": "Chunked"
+        }
+      }
+    }
+  },
+  "outputs": {}
+}

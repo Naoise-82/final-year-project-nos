@@ -1,0 +1,40 @@
+Folder.GetSubfolders Folder: $'''C:\\Users\\Naoise\\OneDrive - Cork Education and Training Board\\02 - Subjects\\Computer Science\\CS_Test_Autograding''' FolderFilter: $'''*''' IncludeSubfolders: False FailOnAccessDenied: True SortBy1: Folder.SortBy.NoSort SortDescending1: False SortBy2: Folder.SortBy.NoSort SortDescending2: False SortBy3: Folder.SortBy.NoSort SortDescending3: False Subfolders=> Folders
+
+Variables.CreateNewList List=> AssignmentNames
+
+LOOP FOREACH FolderPath IN Folders
+
+    Variables.AddItemToList Item: FolderPath.Name List: AssignmentNames NewList=> AssignmentNames
+
+END
+
+Display.SelectFromListDialog.SelectFromList Title: $'''Select The Assignment Folder''' List: AssignmentNames IsTopMost: False AllowEmpty: False SelectedItem=> SelectedAssignment SelectedIndex=> SelectedIndex ButtonPressed=> ButtonPressed
+
+File.ReadFromCSVFile.ReadCSV CSVFile: $'''C:\\Users\\Naoise\\OneDrive - Cork Education and Training Board\\02 - Subjects\\Computer Science\\CS_Test_Autograding\\%SelectedAssignment%\\feedback_data.csv''' Encoding: File.CSVEncoding.SystemDefault TrimFields: True FirstLineContainsColumnNames: True ColumnsSeparator: File.CSVColumnsSeparator.SystemDefault CSVTable=> CSVTable
+
+Outlook.Launch Instance=> OutlookInstance
+
+LOOP FOREACH DataRow IN CSVTable
+
+    File.ReadTextFromFile.ReadText File: DataRow[4] Encoding: File.TextFileEncoding.UTF8 Content=> FileContents
+    Outlook.SendEmailThroughOutlook.SendEmail Instance: OutlookInstance Account: $'''naoise.osullivan@corketb.ie''' SendTo: DataRow['email'] Subject: $'''%DataRow[2]% Feedback''' Body: $'''<p>Hi %DataRow['name']%,</p>
+
+<p>Here is your feedback for the assignment:</p>
+
+%FileContents%
+<p>Regards,<br>
+Mr. O\'Sullivan</p>''' IsBodyHtml: True
+END
+
+DISABLE Outlook.Close Instance: OutlookInstance
+
+# [ControlRepository][PowerAutomateDesktop]
+
+{
+  "ControlRepositorySymbols": [],
+  "ImageRepositorySymbol": {
+    "Name": "imgrepo",
+    "ImportMetadata": {},
+    "Repository": "{\r\n  \"Folders\": [],\r\n  \"Images\": [],\r\n  \"Version\": 1\r\n}"
+  }
+}

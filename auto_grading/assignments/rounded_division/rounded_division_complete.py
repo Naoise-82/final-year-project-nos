@@ -1,6 +1,6 @@
 # A function for dividing any 2 numbers and returning the result to 2 decimal places
-name = "frank"
-email_address = "frank@frank.com"
+
+# Student Name:
 
 def rounded_division(a,b):
 
